@@ -3,7 +3,7 @@ module.exports = {
     proxy: 'https://data.coa.gov.tw/',
   },
   publicPath: process.env.NODE_ENV === 'production'
-    ? '/Vue-Mask-Map/'
+    ? '/animal-shelter-map/'
     : '/',
 
   configureWebpack: {
