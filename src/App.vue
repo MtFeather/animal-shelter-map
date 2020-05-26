@@ -39,8 +39,19 @@
               })" :key="a.ShelterName">
             <div class="card-body">
               <h6 class="card-title"><strong>{{ a.ShelterName }}</strong></h6>
-              <p class="card-text" v-if="dataReady">開放認養數量: {{ animals.filter((data) =>
-                 data.shelter_name === a.ShelterName).length }}</p>
+              <p class="card-text">開放認養數量: {{ animals.filter((data) =>
+                data.shelter_name === a.ShelterName).length }}</p>
+              <p class="card-text">
+                狗: {{ animals.filter((data) => {
+                if (data.shelter_name === a.ShelterName)
+                  return data.animal_kind === '狗';
+                }).length }} |
+                貓: {{ animals.filter((data) => {
+                if (data.shelter_name === a.ShelterName)
+                  return data.animal_kind === '貓';
+                }).length }}
+              </p>
+              <p>連絡電話: {{ a.Tel }}</p>
             </div>
           </div>
         </div>
@@ -57,6 +68,7 @@
 <script>
 import L from 'leaflet';
 import shelterData from './assets/shelterCity.json';
+import asData from './assets/animal-shelter.json';
 
 let openStreetMap = {};
 
@@ -64,7 +76,7 @@ export default {
   name: 'App',
   data: () => ({
     asAPI: 'Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL',
-    asData: [],
+    asData,
     shelterData,
     animals: [],
     dataReady: false,
@@ -145,12 +157,14 @@ export default {
       this.animals = result;
     },
   },
-  async mounted() {
+  mounted() {
+    /**
     const api = `${this.asAPI}&animal_status=OPEN`;
     this.$http.get(api).then((response) => {
       this.asData = response.data;
       this.dataReady = true;
     });
+     */
 
     openStreetMap = L.map('map', {
       center: [24, 120.8],
@@ -165,6 +179,7 @@ export default {
     }).addTo(openStreetMap);
 
     this.ducumentReady();
+    this.updateAnimal();
   },
 };
 </script>
