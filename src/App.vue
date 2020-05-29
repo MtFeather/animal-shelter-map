@@ -37,7 +37,7 @@
                   return city.ShelterName === select.store;
                 }
               })" :key="a.ShelterName">
-            <div class="card-body">
+            <div class="card-body" @click="showPopup(a.ShelterOrder)">
               <h6 class="card-title"><strong>{{ a.ShelterName }}</strong></h6>
               <p class="card-text">開放認養數量: {{ animals.filter((data) =>
                 data.shelter_name === a.ShelterName).length }}</p>
@@ -84,6 +84,7 @@ export default {
       city: 'all',
       store: 'all',
     },
+    markers: [],
   }),
   components: {
   },
@@ -119,14 +120,15 @@ export default {
     },
     ducumentReady() {
       this.shelterData.forEach((data) => {
-        L.marker([
+        const marker = L.marker([
           data.LAT,
           data.LNG,
-        ]).addTo(openStreetMap).bindPopup(`<p><strong style="font-size: 20px;">${data.ShelterName}</strong></p>
+        ], { title: data.ShelterOrder }).addTo(openStreetMap).bindPopup(`<p><strong style="font-size: 20px;">${data.ShelterName}</strong></p>
           地址: ${data.Address}<br>
           電話: ${data.Tel}<br>
           <span style="color: #d45345;">${data.Memo}</span><br>
           認養網頁: <a href="${data.link}" target="_blank">${data.link}</a>`);
+        this.markers.push(marker);
       });
     },
     updateMap() {
@@ -134,20 +136,22 @@ export default {
       openStreetMap.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
           openStreetMap.removeLayer(layer);
+          this.markers = [];
         }
       });
 
       // add markers
       this.shelter.forEach((data) => {
         // 透過藥局經緯度疊加標記
-        L.marker([
+        const marker = L.marker([
           data.LAT,
           data.LNG,
-        ]).addTo(openStreetMap).bindPopup(`<p><strong style="font-size: 20px;">${data.ShelterName}</strong></p>
+        ], { title: data.ShelterOrder }).addTo(openStreetMap).bindPopup(`<p><strong style="font-size: 20px;">${data.ShelterName}</strong></p>
           地址: ${data.Address}<br>
           電話: ${data.Tel}<br>
           <span style="color: #d45345;">${data.Memo}</span><br>
           認養網頁: <a href="${data.link}" target="_blank">${data.link}</a>`);
+        this.markers.push(marker);
       });
     },
     updateAnimal() {
@@ -155,6 +159,16 @@ export default {
       const result = this.asData.filter((f) => this.shelter.filter((d) => (
         d.ShelterName === f.shelter_name)));
       this.animals = result;
+    },
+    showPopup(id) {
+      this.markers.forEach((marker) => {
+        const markerID = marker.options.title;
+        const position = marker.getLatLng();
+        if (markerID === id) {
+          openStreetMap.setView(position, 15);
+          marker.openPopup();
+        }
+      });
     },
   },
   mounted() {
@@ -195,5 +209,13 @@ export default {
 .bd-links {
   max-height: calc(100vh - 12.5rem);
   overflow-y: auto;
+}
+
+.card {
+  cursor: pointer;
+}
+
+.card:hover {
+  background-color: #f1f1f1;
 }
 </style>
